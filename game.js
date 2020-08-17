@@ -3,6 +3,9 @@ const config = {
     width : 800,
     height: 550,
     backgroundColor: "#000000",
+    audio: {
+        disableWebAudio: true
+      },
     physics: {
         default: 'arcade',
         arcade: {
