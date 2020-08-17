@@ -7,6 +7,8 @@ class IntroScene extends Phaser.Scene {
         this.load.image('invisibleplatform','tf2images/invisibleplatform.png');
         this.load.image('dustbowlbg','tf2images/dustbowlbg.png');
         this.load.image('dialoguebox','tf2images/dialoguebox.png');
+        this.load.image('arrowkey','tf2images/arrowkey.png');
+        this.load.image('shootbutton','tf2images/shoot.png');
         //audio
         this.load.audio('pistol_shoot', 'tf2images/pistol_shoot.mp3');
         this.load.audio('westernmusic', 'tf2images/westernmusic.mp3');
@@ -21,6 +23,57 @@ class IntroScene extends Phaser.Scene {
         this.load.image('bullet','tf2images/bullet.png');
     }
     create(){
+        gameState.mobilecontrols = function(scene){
+            scene.add.text(20, 510, `MobileControls :`, { fontSize: '15px', fill: '#FFFFFF' });
+            gameState.jumpbutton = scene.add.image(180,500, 'arrowkey').setOrigin(0,0).setInteractive(); 
+            gameState.shootbutton = scene.add.image(250,500, 'shootbutton').setOrigin(0,0).setInteractive(); 
+            gameState.jumpbutton.on('pointerdown', () => {
+                if(gameState.heroshooting === false){
+                    if(!gameState.hero.body.touching.down){
+                        gameState.hero.anims.play('scoutjump',true);
+                    }
+                    else {
+                        gameState.hero.anims.play('scoutidle',true);
+                    }
+                    gameState.hero.body.checkCollision.down = true;
+                    if(gameState.hero.body.touching.down && gameState.herojumpcooldown === false){
+                        gameState.hero.setVelocityY(-500);
+                        gameState.herojumpcooldown = true;
+                        scene.time.addEvent({
+                            delay: 1800,
+                            callback: ()=>{
+                                gameState.herojumpcooldown = false;
+                            },  
+                            startAt: 0,
+                            timeScale: 1
+                        }); 
+                    }
+                }
+            });
+            gameState.shootbutton.on('pointerdown', () => {
+                if(gameState.heroshooting === false && gameState.hero.body.touching.down){
+                    gameState.heroshooting = true;
+                    gameState.hero.anims.play('scoutshoot',true);
+                    scene.time.addEvent({
+                        delay: 500,
+                        callback: ()=>{
+                            gameState.shootpistol.play();
+                            gameState.herobullets.create(gameState.hero.x+30, gameState.hero.y, 'bullet').setGravityX(2000).setGravityY(-1000);
+                        },  
+                        startAt: 0,
+                        timeScale: 1
+                    }); 
+                    scene.time.addEvent({
+                        delay: 1000,
+                        callback: ()=>{
+                            gameState.heroshooting = false;
+                        },  
+                        startAt: 0,
+                        timeScale: 1
+                    }); 
+                }
+            });
+        }
         gameState.playing = true;
         gameState.cursors = this.input.keyboard.createCursorKeys();
         gameState.keys = this.input.keyboard.addKeys('W,S,A,D,R,SPACE,SHIFT');
@@ -44,24 +97,26 @@ class IntroScene extends Phaser.Scene {
             repeat: -1
         }); 
         gameState.dialogue = function(scene){
-            if(gameState.keys.SPACE.isDown && gameState.dialoguecooldown <= 0){
-                if(gameState.dialogueswitch === 1){
-                    gameState.dialogueswitch = 2;
-                } 
-                else if(gameState.dialogueswitch === 2){
-                    gameState.dialoguenumber += 1;
-                    gameState.dialogueswitch = 1;
-                } 
-                if(gameState.dialogueswitch === 1){
-                    gameState.roboscouttext.destroy();
-                    gameState.scouttext = scene.add.text(65, 445, `RedScout = ${gameState.redscoutdialogue[gameState.dialoguenumber]}`, { fontSize: '15px', fill: '#00000' }); 
+            scene.input.on('pointerdown', () => {
+                if(gameState.dialoguecooldown <= 0 && gameState.dialogueover === false){
+                    if(gameState.dialogueswitch === 1){
+                        gameState.dialogueswitch = 2;
+                    } 
+                    else if(gameState.dialogueswitch === 2){
+                        gameState.dialoguenumber += 1;
+                        gameState.dialogueswitch = 1;
+                    } 
+                    if(gameState.dialogueswitch === 1){
+                        gameState.roboscouttext.destroy();
+                        gameState.scouttext = scene.add.text(65, 445, `RedScout = ${gameState.redscoutdialogue[gameState.dialoguenumber]}`, { fontSize: '15px', fill: '#00000' }); 
+                    }
+                    else if(gameState.dialogueswitch === 2){
+                        gameState.scouttext.destroy();
+                        gameState.roboscouttext = scene.add.text(65, 445, `RoboScout = ${gameState.roboscoutdialogue[gameState.dialoguenumber]}`, { fontSize: '15px', fill: '#00000' });
+                    }
+                    gameState.dialoguecooldown = 50;
                 }
-                else if(gameState.dialogueswitch === 2){
-                    gameState.scouttext.destroy();
-                    gameState.roboscouttext = scene.add.text(65, 445, `RoboScout = ${gameState.roboscoutdialogue[gameState.dialoguenumber]}`, { fontSize: '15px', fill: '#00000' });
-                }
-                gameState.dialoguecooldown = 50;
-            }
+            });
             if(gameState.dialoguenumber === 2 && gameState.dialogueswitch === 2){
                 gameState.dialogueover = true;
                 gameState.scouttext.destroy();
@@ -69,6 +124,7 @@ class IntroScene extends Phaser.Scene {
                 gameState.dialoguebox.destroy();
                 gameState.herohealthtext = scene.add.text(180, 250, `${gameState.herohealth}/20`, { fontSize: ' bold 20px', fill: '#00000'});
                 gameState.enemyherohealthtext = scene.add.text(560, 250, `${gameState.enemyherohealth}/30`, { fontSize: 'bold 20px', fill: '#00000' });
+                gameState.mobilecontrols(scene);
             }
         }
         gameState.westernmusic = this.sound.add('westernmusic');
