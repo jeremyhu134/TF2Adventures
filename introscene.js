@@ -123,7 +123,7 @@ class IntroScene extends Phaser.Scene {
                 gameState.roboscouttext.destroy();
                 gameState.dialoguebox.destroy();
                 gameState.herohealthtext = scene.add.text(180, 250, `${gameState.herohealth}/20`, { fontSize: ' bold 20px', fill: '#00000'});
-                gameState.enemyherohealthtext = scene.add.text(560, 250, `${gameState.enemyherohealth}/30`, { fontSize: 'bold 20px', fill: '#00000' });
+                gameState.enemyherohealthtext = scene.add.text(560, 250, `${gameState.enemyherohealth}/50`, { fontSize: 'bold 20px', fill: '#00000' });
                 gameState.mobilecontrols(scene);
             }
         }
@@ -132,7 +132,7 @@ class IntroScene extends Phaser.Scene {
         gameState.invisibleplatform.create(0,350,'invisibleplatform').setOrigin(0,0).refreshBody(0);
         gameState.loopSound = {
             loop: true,
-            volume: 2
+            volume: 1
         }
         gameState.westernmusic.play(gameState.loopSound);
         //animations
@@ -225,7 +225,7 @@ class IntroScene extends Phaser.Scene {
         gameState.enemyhero = this.physics.add.sprite(550,317,'roboscout');
         gameState.roboscoutpain = this.sound.add('roboscout_pain');
         gameState.roboscouttaunt = this.sound.add('roboscout_taunt');
-        gameState.enemyherohealth = 30;
+        gameState.enemyherohealth = 50;
         gameState.enemyherobullets = this.physics.add.group();
         gameState.enemyherobullets.outOfBoundsKill = true;
         gameState.enemyheroshooting = false;
@@ -239,14 +239,16 @@ class IntroScene extends Phaser.Scene {
             if(gameState.enemyheroshooting === false){
                 gameState.enemyheroshooting = true;
                 scene.time.addEvent({
-                    delay: 5000,
+                    delay: 3000,
                     callback: ()=>{
                         gameState.enemyhero.anims.play('roboscoutshoot',true);
                         scene.time.addEvent({
                             delay: 500,
                             callback: ()=>{
-                                gameState.shootpistol.play();
-                                gameState.enemyherobullets.create(gameState.enemyhero.x-30, gameState.enemyhero.y, 'bullet').setGravityX(-1500).setGravityY(-1000).flipX = true;
+                                if(gameState.enemyherohealth > 0){
+                                    gameState.shootpistol.play();
+                                    gameState.enemyherobullets.create(gameState.enemyhero.x-30, gameState.enemyhero.y, 'bullet').setGravityX(-1500).setGravityY(-1000).flipX = true;
+                                }
                             },  
                             startAt: 0,
                             timeScale: 1
@@ -295,9 +297,10 @@ class IntroScene extends Phaser.Scene {
             hero.destroy();
             gameState.enemyherohealth -= 5;
             gameState.enemyherohealthtext.destroy();
-            gameState.enemyherohealthtext = this.add.text(560, 250, `${gameState.enemyherohealth}/30`, { fontSize: 'bold 20px', fill: '#00000' });
+            gameState.enemyherohealthtext = this.add.text(560, 250, `${gameState.enemyherohealth}/50`, { fontSize: 'bold 20px', fill: '#00000' });
             if(gameState.enemyherohealth <= 0){
                 this.physics.pause();
+                gameState.missionnumber = 2;
                 gameState.playing = false;
                 gameState.westernmusic.setMute(true);
                 gameState.scouttaunt.play();

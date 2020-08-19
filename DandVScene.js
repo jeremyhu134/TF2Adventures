@@ -21,7 +21,7 @@ class DandVScene extends Phaser.Scene {
                 callback: ()=>{
                     this.scene.stop('DandVScene');
                     this.scene.stop('IntroScene');
-                    this.scene.start('IntroScene');
+                    this.scene.start('MenuScene');
                 },  
                 startAt: 0,
                 timeScale: 1
@@ -35,7 +35,7 @@ class DandVScene extends Phaser.Scene {
                 callback: ()=>{
                     this.scene.stop('DandVScene');
                     this.scene.stop('IntroScene');
-                    this.scene.start('IntroScene'); 
+                    this.scene.start('MenuScene'); 
                 },  
                 startAt: 0,
                 timeScale: 1

@@ -23,5 +23,5 @@ const config = {
 const game = new Phaser.Game(config);
 
 let gameState = {
-    
+    missionnumber : 1
 }
