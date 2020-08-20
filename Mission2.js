@@ -1,26 +1,29 @@
-class IntroScene extends Phaser.Scene {
+class Mission2Scene extends Phaser.Scene {
     constructor() {
-		super({ key: 'IntroScene' })
+		super({ key: 'Mission2Scene' })
 	}
     preload(){
         //backgrounds
         this.load.image('invisibleplatform','tf2images/invisibleplatform.png');
-        this.load.image('dustbowlbg','tf2images/dustbowlbg.png');
+        this.load.image('barnblitzbg','tf2images/barnblitzbg.png');
         this.load.image('dialoguebox','tf2images/dialoguebox.png');
         this.load.image('arrowkey','tf2images/arrowkey.png');
         this.load.image('shootbutton','tf2images/shoot.png');
         //audio
         this.load.audio('pistol_shoot', 'tf2images/pistol_shoot.mp3');
-        this.load.audio('westernmusic', 'tf2images/westernmusic.mp3');
+        this.load.audio('grenadelauncher_shoot', 'tf2images/grenadelauncher_shoot.mp3');
+        this.load.audio('explode', 'tf2images/explode.mp3');
+        this.load.audio('snowymusic', 'tf2images/snowymusic.mp3');
         this.load.audio('scout_pain', 'tf2images/scout_pain.mp3');
-        this.load.audio('roboscout_pain', 'tf2images/roboscout_pain.mp3');
-        this.load.audio('roboscout_taunt', 'tf2images/roboscout_taunt.mp3');
+        this.load.audio('robodemoman_pain', 'tf2images/robodemoman_pain.mp3');
+        this.load.audio('robodemoman_taunt', 'tf2images/robodemoman_taunt.mp3');
         this.load.audio('redscout_taunt', 'tf2images/redscout_taunt.mp3');
         //characters
         this.load.spritesheet('redscout','tf2images/RedScout.png',{frameWidth: 45,frameHeight:65});
-        this.load.spritesheet('roboscout','tf2images/RoboScout.png',{frameWidth: 45,frameHeight:65});
+        this.load.spritesheet('robodemoman','tf2images/robodemoman.png',{frameWidth: 45,frameHeight:65});
         //bullets
         this.load.image('bullet','tf2images/bullet.png');
+        this.load.image('pill','tf2images/pill.png');
     }
     create(){
         gameState.mobilecontrols = function(scene){
@@ -78,15 +81,15 @@ class IntroScene extends Phaser.Scene {
         gameState.cursors = this.input.keyboard.createCursorKeys();
         gameState.keys = this.input.keyboard.addKeys('W,S,A,D,R,SPACE,SHIFT');
         gameState.dialogueover = false;
-        this.add.image(0,0,'dustbowlbg').setOrigin(0,0);
+        this.add.image(0,0,'barnblitzbg').setOrigin(0,0);
         gameState.dialogueswitch = 1;
         gameState.dialoguenumber = 0;
-        gameState.redscoutdialogue = ['What is this imposter doing here?','Whatever chucklenuts, you roboheads need go get outer here.','...Niceone.'];
-        gameState.roboscoutdialogue = ['Imposter? If anything your the imposter. I\'m an upgraded\n version of you','Skullhead.'];
+        gameState.redscoutdialogue = ['A drunk robot? Machines can do anything these days.','Eh.. I can even smell it.','Prepare to get wasted!'];
+        gameState.robodemomandialogue = ['....*BURP*','Shut up you pint sized mut!'];
         gameState.dialoguebox = this.add.image(50,400,'dialoguebox').setOrigin(0,0);
         gameState.scouttext = this.add.text(65, 445, `RedScout = ${gameState.redscoutdialogue[gameState.dialoguenumber]}`, { fontSize: '15px', fill: '#00000' });
         gameState.dialoguecooldown = 50;
-        gameState.roboscouttext = this.add.text(65, 445, ``, { fontSize: '15px', fill: '#00000' });
+        gameState.robodemomantext = this.add.text(65, 445, ``, { fontSize: '15px', fill: '#00000' });
         this.time.addEvent({
             delay: 1,
             callback: ()=>{
@@ -107,12 +110,12 @@ class IntroScene extends Phaser.Scene {
                         gameState.dialogueswitch = 1;
                     } 
                     if(gameState.dialogueswitch === 1){
-                        gameState.roboscouttext.destroy();
+                        gameState.robodemomantext.destroy();
                         gameState.scouttext = scene.add.text(65, 445, `RedScout = ${gameState.redscoutdialogue[gameState.dialoguenumber]}`, { fontSize: '15px', fill: '#00000' }); 
                     }
                     else if(gameState.dialogueswitch === 2){
                         gameState.scouttext.destroy();
-                        gameState.roboscouttext = scene.add.text(65, 445, `RoboScout = ${gameState.roboscoutdialogue[gameState.dialoguenumber]}`, { fontSize: '15px', fill: '#00000' });
+                        gameState.robodemomantext = scene.add.text(65, 445, `RoboDemoman = ${gameState.robodemomandialogue[gameState.dialoguenumber]}`, { fontSize: '15px', fill: '#00000' });
                     }
                     gameState.dialoguecooldown = 50;
                 }
@@ -120,21 +123,22 @@ class IntroScene extends Phaser.Scene {
             if(gameState.dialoguenumber === 2 && gameState.dialogueswitch === 2){
                 gameState.dialogueover = true;
                 gameState.scouttext.destroy();
-                gameState.roboscouttext.destroy();
+                gameState.robodemomantext.destroy();
                 gameState.dialoguebox.destroy();
                 gameState.herohealthtext = scene.add.text(180, 250, `${gameState.herohealth}/20`, { fontSize: ' bold 20px', fill: '#00000'});
-                gameState.enemyherohealthtext = scene.add.text(560, 250, `${gameState.enemyherohealth}/50`, { fontSize: 'bold 20px', fill: '#00000' });
+                gameState.enemyherohealthtext = scene.add.text(560, 250, `${gameState.enemyherohealth}/75`, { fontSize: 'bold 20px', fill: '#00000' });
                 gameState.mobilecontrols(scene);
             }
         }
-        gameState.westernmusic = this.sound.add('westernmusic');
+        gameState.snowymusic = this.sound.add('snowymusic');
+        gameState.explode = this.sound.add('explode');
         gameState.invisibleplatform = this.physics.add.staticGroup();
         gameState.invisibleplatform.create(0,350,'invisibleplatform').setOrigin(0,0).refreshBody(0);
         gameState.loopSound = {
             loop: true,
             volume: 1
         }
-        gameState.westernmusic.play(gameState.loopSound);
+        gameState.snowymusic.play(gameState.loopSound);
         //animations
         this.anims.create({
             key: 'scoutidle',
@@ -154,16 +158,16 @@ class IntroScene extends Phaser.Scene {
             frames:this.anims.generateFrameNames('redscout',{start: 5,end: 8})
         });
         this.anims.create({
-            key: 'roboscoutidle',
+            key: 'robodemomanidle',
             repeat: -1,
             frameRate: 5,
-            frames:this.anims.generateFrameNames('roboscout',{start: 0,end: 3})
+            frames:this.anims.generateFrameNames('robodemoman',{start: 0,end: 3})
         });
         this.anims.create({
-            key: 'roboscoutshoot',
+            key: 'robodemomanshoot',
             repeat: -1,
             frameRate: 5,
-            frames:this.anims.generateFrameNames('roboscout',{start: 4,end: 8})
+            frames:this.anims.generateFrameNames('robodemoman',{start: 4,end: 9})
         });
         //fighter
         gameState.hero = this.physics.add.sprite(250,317,'redscout');
@@ -177,6 +181,7 @@ class IntroScene extends Phaser.Scene {
         this.physics.add.collider(gameState.hero, gameState.invisibleplatform);
         gameState.hero.anims.play('scoutidle',true);
         gameState.shootpistol = this.sound.add('pistol_shoot');
+        gameState.shootgrenadelauncher = this.sound.add('grenadelauncher_shoot');
         gameState.scoutmovement = function(scene){
             if(gameState.heroshooting === false){
                 if(!gameState.hero.body.touching.down){
@@ -190,7 +195,7 @@ class IntroScene extends Phaser.Scene {
                     gameState.hero.setVelocityY(-500);
                     gameState.herojumpcooldown = true;
                     scene.time.addEvent({
-                        delay: 1800,
+                        delay: 900,
                         callback: ()=>{
                             gameState.herojumpcooldown = false;
                         },  
@@ -221,40 +226,57 @@ class IntroScene extends Phaser.Scene {
                 }); 
             }
         }
-        //roboscout
-        gameState.enemyhero = this.physics.add.sprite(550,317,'roboscout');
-        gameState.roboscoutpain = this.sound.add('roboscout_pain');
-        gameState.roboscouttaunt = this.sound.add('roboscout_taunt');
-        gameState.enemyherohealth = 50;
+        //robodemoman
+        gameState.enemyhero = this.physics.add.sprite(550,317,'robodemoman');
+        gameState.robodemomanpain = this.sound.add('robodemoman_pain');
+        gameState.robodemomantaunt = this.sound.add('robodemoman_taunt');
+        gameState.enemyherohealth = 75;
         gameState.enemyherobullets = this.physics.add.group();
         gameState.enemyherobullets.outOfBoundsKill = true;
         gameState.enemyheroshooting = false;
         this.physics.add.collider(gameState.enemyhero, gameState.invisibleplatform);
-        gameState.enemyhero.anims.play('roboscoutidle',true);
-        gameState.roboscoutmovement = function(scene){
+        gameState.enemyhero.anims.play('robodemomanidle',true);
+        gameState.robodemomanmovement = function(scene){
             if(gameState.enemyheroshooting === false){
-                gameState.enemyhero.anims.play('roboscoutidle',true);
+                gameState.enemyhero.anims.play('robodemomanidle',true);
                 gameState.hero.body.checkCollision.down = true;
             }
             if(gameState.enemyheroshooting === false){
                 gameState.enemyheroshooting = true;
                 scene.time.addEvent({
-                    delay: 3000,
+                    delay: 7000,
                     callback: ()=>{
-                        gameState.enemyhero.anims.play('roboscoutshoot',true);
-                        scene.time.addEvent({
-                            delay: 500,
-                            callback: ()=>{
-                                if(gameState.enemyherohealth > 0){
-                                    gameState.shootpistol.play();
-                                    gameState.enemyherobullets.create(gameState.enemyhero.x-30, gameState.enemyhero.y, 'bullet').setGravityX(-1500).setGravityY(-1000).flipX = true;
-                                }
-                            },  
-                            startAt: 0,
-                            timeScale: 1
-                        }); 
                         scene.time.addEvent({
                             delay: 1000,
+                            callback: ()=>{
+                                gameState.enemyhero.anims.play('robodemomanshoot',true);
+                                scene.time.addEvent({
+                                    delay: 500,
+                                    callback: ()=>{
+                                        if(gameState.enemyherohealth > 0){
+                                            var random = Math.ceil(Math.random()*2);
+                                            if(random == 1){
+                                                gameState.shootgrenadelauncher.play();
+                                                gameState.enemyherobullets = scene.physics.add.sprite(gameState.enemyhero.x,gameState.enemyhero.y,`pill`).setGravityY(-500);
+                                                scene.physics.moveTo(gameState.enemyherobullets,gameState.hero.x, gameState.hero.y-100,500); 
+                                            }
+                                            else {
+                                                gameState.shootgrenadelauncher.play();
+                                                gameState.enemyherobullets = scene.physics.add.sprite(gameState.enemyhero.x,gameState.enemyhero.y,`pill`).setGravityY(-500);
+                                                scene.physics.moveTo(gameState.enemyherobullets,gameState.hero.x, gameState.hero.y-200,600); 
+                                            }
+                                        }
+                                    },  
+                                    startAt: 0,
+                                    timeScale: 1
+                                }); 
+                            },  
+                            startAt: 0,
+                            timeScale: 1,
+                            repeat: 2
+                        }); 
+                        scene.time.addEvent({
+                            delay: 3000,
                             callback: ()=>{
                                 gameState.enemyheroshooting = false;
                             },  
@@ -272,15 +294,17 @@ class IntroScene extends Phaser.Scene {
     update(){
         this.physics.add.overlap(gameState.enemyherobullets, gameState.hero,(ammo, hero)=>{
             gameState.scoutpain.play();
-            hero.destroy();
-            gameState.herohealth -= 5;
+            gameState.explode.play();
+            ammo.destroy();
+            gameState.herohealth -= 8;
             gameState.herohealthtext.destroy();
             gameState.herohealthtext = this.add.text(180, 250, `${gameState.herohealth}/20`, { fontSize: ' bold 20px', fill: '#00000'});
             if(gameState.herohealth <= 0){
+                gameState.herohealthtext = this.add.text(180, 250, `0/20`, { fontSize: ' bold 20px', fill: '#00000'});
                 this.physics.pause();
                 gameState.playing = false;
-                gameState.westernmusic.setMute(true);
-                gameState.roboscouttaunt.play();
+                gameState.snowymusic.setMute(true);
+                gameState.robodemomantaunt.play();
                 gameState.status = 'defeat';
                 this.time.addEvent({
                     delay: 3000,
@@ -293,18 +317,18 @@ class IntroScene extends Phaser.Scene {
             }
         });
         this.physics.add.overlap(gameState.herobullets, gameState.enemyhero,(ammo, hero)=>{
-            gameState.roboscoutpain.play();
+            gameState.robodemomanpain.play();
             hero.destroy();
             gameState.enemyherohealth -= 5;
             gameState.enemyherohealthtext.destroy();
-            gameState.enemyherohealthtext = this.add.text(560, 250, `${gameState.enemyherohealth}/50`, { fontSize: 'bold 20px', fill: '#00000' });
+            gameState.enemyherohealthtext = this.add.text(560, 250, `${gameState.enemyherohealth}/75`, { fontSize: 'bold 20px', fill: '#00000' });
             if(gameState.enemyherohealth <= 0){
+                gameState.enemyherohealthtext = this.add.text(560, 250, `0/75`, { fontSize: 'bold 20px', fill: '#00000' });
                 this.physics.pause();
-                gameState.dialogueover = false;
-                gameState.missionnumber = 2;
+                gameState.missionnumber = 3;
                 localStorage.missionnumber = gameState.missionnumber;
                 gameState.playing = false;
-                gameState.westernmusic.setMute(true);
+                gameState.snowymusic.setMute(true);
                 gameState.scouttaunt.play();
                 gameState.status = 'victory';
                 this.time.addEvent({
@@ -320,7 +344,7 @@ class IntroScene extends Phaser.Scene {
         if(gameState.dialogueover === true){
             if(gameState.playing === true){
                 gameState.scoutmovement(this); 
-                gameState.roboscoutmovement(this);
+                gameState.robodemomanmovement(this);
             }
             else{
                 

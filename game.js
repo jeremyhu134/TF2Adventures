@@ -14,7 +14,7 @@ const config = {
             //debug: true
         }
     },
-    scene:[MenuScene,IntroScene,DandVScene],
+    scene:[MenuScene,IntroScene,Mission2Scene,DandVScene],
     scale: {
         zoom: 1.3
     }
@@ -23,5 +23,11 @@ const config = {
 const game = new Phaser.Game(config);
 
 let gameState = {
-    missionnumber : 1
+    missionnumber : 1,
+    loadSave:()=>{
+        if(localStorage.missionnumber === null){
+            gameState.missionnumber = 1;
+        }
+        gameState.missionnumber = localStorage.missionnumber;
+    }
 }
