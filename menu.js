@@ -5,6 +5,7 @@ class MenuScene extends Phaser.Scene {
     preload(){
         this.load.image('headquarters','tf2images/headquarters.png');
         this.load.image('nextmissionbutton','tf2images/nextmissionbutton.png');
+        this.load.image('resetbutton','tf2images/resetbutton.png');
         this.load.image('title','tf2images/title.png');
         this.load.spritesheet('idlemedic','tf2images/idlemedic.png',{frameWidth: 50,frameHeight:80});
         this.load.spritesheet('idleengineer','tf2images/idleengineer.png',{frameWidth: 50,frameHeight:80});
@@ -52,6 +53,7 @@ class MenuScene extends Phaser.Scene {
         var idledemoman = this.add.sprite(550,210,'idledemoman').setOrigin(0,0);
         
         var missionbutton = this.add.image(550,400,'nextmissionbutton').setOrigin(0,0).setInteractive();
+        var resetbutton = this.add.image(50,400,'resetbutton').setOrigin(0,0).setInteractive();
         missionbutton.on('pointerup', () => {
             if(gameState.dialogueover === true){
                 if(gameState.missionnumber == 1){
@@ -65,6 +67,11 @@ class MenuScene extends Phaser.Scene {
                     this.scene.start('Mission2Scene');
                 }
                 else if(gameState.missionnumber == 3){
+                    hqm.setMute(true);
+                    this.scene.stop('MenuScene');
+                    this.scene.start('Mission3Scene');
+                }
+                else if(gameState.missionnumber == 4){
                     var newstext = this.add.text(500, 300, `New missions\n coming soon!`, { fontSize: 'bold 30px', fill: '#FFFFFF' });
                     this.time.addEvent({
                         delay: 3000,
@@ -79,6 +86,19 @@ class MenuScene extends Phaser.Scene {
                     console.log('suc')
                 }
             }
+		});
+        resetbutton.on('pointerup', () => {
+            gameState.missionnumber = 1;
+            localStorage.missionnumber = 1;
+            var resettext = this.add.text(50, 350, `Progress Reset`, { fontSize: 'bold 30px', fill: '#FFFFFF' });
+            this.time.addEvent({
+                delay: 3000,
+                callback: ()=>{
+                    resettext.destroy();
+                },  
+                startAt: 0,
+                timeScale: 1
+            }); 
 		});
         if(gameState.missionnumber == 2 && gameState.dialogueover === false){
             gameState.dialoguenumber = 0;
@@ -123,7 +143,7 @@ class MenuScene extends Phaser.Scene {
                 }
             }
         }
-        if(gameState.missionnumber == 3 && gameState.dialogueover === false){
+        else if(gameState.missionnumber == 3 && gameState.dialogueover === false){
             gameState.dialoguenumber = 0;
             gameState.dialogueswitch = 2;
             gameState.medicdialogue = ['Oooo. Two missions completed! Well done scout. Did those\n robots give any trouble?'];
@@ -162,6 +182,50 @@ class MenuScene extends Phaser.Scene {
                 if(gameState.dialoguenumber === 1 && gameState.dialogueswitch === 2){
                     gameState.dialogueover = true;
                     gameState.scouttext.destroy();
+                    gameState.medictext.destroy();
+                    gameState.dialoguebox.destroy();
+                }
+            }
+        }
+        else if(gameState.missionnumber == 4 && gameState.dialogueover === false){
+            gameState.dialoguenumber = 0;
+            gameState.dialogueswitch = 2;
+            gameState.medicdialogue = ['Well done Scout! It is time to give you this pill.','Well, you will either gain 10HP for future battles, or die\n a painful death as your insides melt.','Just take it you Cross-Country loser!','See!'];
+            gameState.redscoutdialogue = ['What does it do doc?','What!? I ain\'t taking this!','*GULP* Hey, I didn\'t die, and I feel stronger!'];
+            gameState.dialoguebox = this.add.image(50,400,'dialoguebox').setOrigin(0,0);
+            gameState.medictext = this.add.text(65, 445, `RedMedic = ${gameState.medicdialogue[gameState.dialoguenumber]}`, { fontSize: '15px', fill: '#00000' });
+            gameState.dialoguecooldown = 50;
+            gameState.redscouttext = this.add.text(65, 445, ``, { fontSize: '15px', fill: '#00000' });
+            this.time.addEvent({
+                delay: 1,
+                callback: ()=>{
+                    gameState.dialoguecooldown -= 1;
+                },  
+                startAt: 0,
+                timeScale: 1,
+                repeat: -1
+            }); 
+            console.log(gameState.dialoguecooldown)
+            gameState.dialogue = function(scene){
+                scene.input.on('pointerdown', () => {
+                    if(gameState.dialoguecooldown <= 0 && gameState.dialogueover === false){
+                        if(gameState.dialogueswitch == 1){
+                            gameState.redscouttext.destroy();
+                            gameState.medictext = scene.add.text(65, 445, `RedMedic = ${gameState.medicdialogue[gameState.dialoguenumber]}`, { fontSize: '15px', fill: '#00000' });
+                            gameState.dialogueswitch = 2;
+                        }
+                        else if(gameState.dialogueswitch == 2){
+                            gameState.medictext.destroy();
+                            gameState.redscouttext = scene.add.text(65, 445, `RedScout = ${gameState.redscoutdialogue[gameState.dialoguenumber]}`, { fontSize: '15px', fill: '#00000' });
+                            gameState.dialoguenumber += 1;
+                            gameState.dialogueswitch = 1;
+                        }
+                        gameState.dialoguecooldown = 50;
+                    }
+                });
+                if(gameState.dialoguenumber === 4 && gameState.dialogueswitch === 1){
+                    gameState.dialogueover = true;
+                    gameState.redscouttext.destroy();
                     gameState.medictext.destroy();
                     gameState.dialoguebox.destroy();
                 }
